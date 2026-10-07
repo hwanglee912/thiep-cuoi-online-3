@@ -6,6 +6,10 @@
  */
 
 export const weddingData = {
+  imageSettingsVersion: 1,
+  invitation: {
+    guestName: "Khách mời",
+  },
   // Thong tin co dau & chu re
   couple: {
     groom: {
@@ -23,7 +27,12 @@ export const weddingData = {
       bio: "Một cô gái ấm áp, luôn mỉm cười khi ở bên anh. Cảm ơn anh đã luôn kiên nhẫn, yêu thương và che chở cho em.",
     },
     heroImage: "/assets/sf-img-0.webp",
+    heroImagePosition: "50% 32%",
     calendarImage: "/assets/sf-img-9.webp",
+    calendarImagePosition: "50% 38%",
+    invitationBackground: "/assets/sf-img-1.webp",
+    invitationBackgroundMode: "repeat",
+    eventIconImage: "/assets/sf-img-4.png",
     quote: "Tình yêu của anh và em là một hành trình kỳ diệu, vượt qua bao thử thách để cùng nhau bước đến ngày trọng đại – ngày của chúng mình. Đám cưới này là lời cam kết chân thành, là khởi đầu cho một chương mới nơi chúng ta cùng vun đắp tổ ấm, sẻ chia vui buồn và nắm tay nhau đi đến cuối con đường mang tên hạnh phúc.",
     storySnippet: "Từ những ngày đầu ngập ngừng cho đến khoảnh khắc quyết định nắm tay nhau trọn đời, từng phút giây trôi qua đều là những ký ức vô giá.",
   },

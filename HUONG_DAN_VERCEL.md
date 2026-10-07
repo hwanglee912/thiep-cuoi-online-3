@@ -23,15 +23,18 @@ Dự án thiệp cưới online đã được nâng cấp toàn diện:
    - **Mật khẩu**: `hihihaha`
 4. Trong bảng quản trị:
    - **Tab Cặp Đôi**: Thay đổi tên cô dâu, chú rể, lời tự sự, thông điệp tình yêu.
+     - Phần **Tên khách mời** đổi tên hiển thị ở lời mời. Bấm **Sao chép link mời riêng** để gửi tên riêng cho từng khách; tên nằm trong tham số `guest` của link, không thay lời mời của người khác. Tạo link trên website đã deploy để có đúng địa chỉ gửi khách.
    - **Tab 2 Ngày Tiệc**: Chỉnh sửa giờ tiệc, ngày dương, ngày âm, địa điểm, link Google Maps của Lễ Vu Quy và Lễ Thành Hôn.
-   - **Tab Album Ảnh**: 
-     - Bấm **"Chọn file ảnh để tải lên"** để chọn ảnh từ điện thoại hoặc máy tính thêm vào album.
-     - Sửa chú thích ảnh trực tiếp.
-     - Bấm biểu tượng thùng rác màu đỏ để xóa ảnh không thích.
+   - **Tab Ảnh & Album**:
+     - Đổi **ảnh bìa, ảnh chú rể, ảnh cô dâu, nền lịch, nền lời mời và biểu tượng nhẫn cưới**. Mỗi ô có xem trước, nút **Chọn ảnh từ thiết bị**, đường dẫn ảnh và nút **Ảnh gốc**.
+     - Kéo **Vị trí ngang / Vị trí dọc** để điều chỉnh phần ảnh nằm trong khung, tránh cắt mặt. Nền lời mời có kiểu lặp như giấy hoặc phủ toàn khung.
+     - Trong album, thay file hoặc đường dẫn của từng ảnh, sửa chú thích/mô tả, thêm ảnh, xóa ảnh và chọn **Đặt ảnh mở đầu album**.
+     - Ảnh từ thiết bị được thu nhỏ tới tối đa 1600 px và nén WebP trước khi lưu. Nếu trình duyệt không đọc được ảnh HEIC, hãy xuất JPG/PNG từ điện thoại rồi chọn lại.
+     - Đợi xử lý ảnh xong trước khi lưu hoặc tải file. Nếu bộ nhớ trình duyệt đầy, vẫn có thể tải file cấu hình để giữ các ảnh đã chọn.
    - **Tab Nhạc & Lời Chúc**: Đổi bài hát nền, sửa lời cảm ơn.
 5. Sau khi sửa xong:
    - Bấm **"Lưu Thay Đổi"**: Toàn bộ trang web trên máy bạn sẽ cập nhật ngay lập tức!
-   - Bấm **"Tải file weddingData.js"**: Trình duyệt sẽ tải về file `weddingData.js`. Bạn chỉ cần chép đè file này vào thư mục `src/config/weddingData.js` trong dự án là mã nguồn sẽ được cập nhật vĩnh viễn cho tất cả mọi người khi đẩy lên Vercel!
+   - Bấm **"Tải file weddingData.js"**: File chứa bản đang chỉnh sửa, kể cả ảnh tải từ thiết bị và các thay đổi chưa bấm lưu. Chép đè vào `src/config/weddingData.js`, đẩy lên GitHub và deploy để khách mời thấy ảnh/nội dung mới. **Lưu Thay Đổi** chỉ lưu trên trình duyệt hiện tại; chưa tự cập nhật website cho khách mời.
 
 ---
 

@@ -11,7 +11,7 @@ export default function CalendarWidget({ date }) {
   const count = new Date(Date.UTC(year, month, 0)).getUTCDate();
   return (
     <div className="wedding-calendar max-w-md mx-auto my-8 text-center" data-reveal="up" aria-label={`Lịch tháng ${month} năm ${year}`}>
-      <img className="calendar-backdrop" src={data.couple.calendarImage || data.couple.heroImage} alt="" aria-hidden="true" loading="lazy" decoding="async" width="614" height="921" />
+      <img className="calendar-backdrop" src={data.couple.calendarImage || data.couple.heroImage} style={{ objectPosition: data.couple.calendarImagePosition || '50% 38%' }} alt="" aria-hidden="true" loading="lazy" decoding="async" width="614" height="921" />
       <div className="calendar-scrim" aria-hidden="true" />
       <div className="calendar-content">
       <p className="calendar-month font-script">Tháng {month}</p>

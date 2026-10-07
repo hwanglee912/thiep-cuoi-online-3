@@ -13,6 +13,7 @@ function normalizeData(saved = {}) {
       bride: { ...defaultData.couple.bride, ...saved.couple?.bride },
     },
     audio: { ...defaultData.audio, ...saved.audio },
+    invitation: { ...defaultData.invitation, ...saved.invitation },
     thankYouMessage: { ...defaultData.thankYouMessage, ...saved.thankYouMessage },
   };
   // Migrate only the old texture placeholders. Keep custom photos and all personal edits.
@@ -22,12 +23,16 @@ function normalizeData(saved = {}) {
     '/assets/sf-img-10.webp': '/assets/sf-img-3.webp',
     '/assets/sf-img-25.webp': '/assets/sf-img-24.webp',
   };
-  merged.couple.groom.avatar = photos[merged.couple.groom.avatar] || merged.couple.groom.avatar;
-  merged.couple.bride.avatar = photos[merged.couple.bride.avatar] || merged.couple.bride.avatar;
-  merged.couple.heroImage = merged.couple.heroImage === '/assets/sf-img-25.webp' ? '/assets/sf-img-0.webp' : merged.couple.heroImage;
+  const migratePlaceholders = saved.imageSettingsVersion !== 1;
+  if (migratePlaceholders) {
+    merged.couple.groom.avatar = photos[merged.couple.groom.avatar] || merged.couple.groom.avatar;
+    merged.couple.bride.avatar = photos[merged.couple.bride.avatar] || merged.couple.bride.avatar;
+    merged.couple.heroImage = merged.couple.heroImage === '/assets/sf-img-25.webp' ? '/assets/sf-img-0.webp' : merged.couple.heroImage;
+  }
+  merged.imageSettingsVersion = 1;
   merged.gallery = (Array.isArray(merged.gallery) ? merged.gallery : defaultData.gallery)
     .filter((photo) => photo && typeof photo.src === 'string')
-    .map((photo) => ({ ...photo, src: photos[photo.src] || photo.src }));
+    .map((photo) => ({ ...photo, src: migratePlaceholders ? photos[photo.src] || photo.src : photo.src }));
   merged.events = Array.isArray(merged.events) && merged.events.length ? merged.events : defaultData.events;
   merged.events = merged.events.map((event) => ({
     ...event, dayOfWeek: getDayOfWeek(event.solarDate), calendarEvent: getEventCalendar(event, merged.couple),
@@ -62,7 +67,8 @@ export function WeddingDataProvider({ children }) {
   };
 
   // Export as weddingData.js file for Vercel deployment
-  const exportConfigFile = () => {
+  const exportConfigFile = (draft = data) => {
+    const exportedData = normalizeData(draft);
     const content = `/**
  * ==============================================================================
  * THIET LAP THONG TIN THIEP CUOI ONLINE
@@ -70,7 +76,7 @@ export function WeddingDataProvider({ children }) {
  * ==============================================================================
  */
 
-export const weddingData = ${JSON.stringify(data, null, 2)};
+export const weddingData = ${JSON.stringify(exportedData, null, 2)};
 `;
     const blob = new Blob([content], { type: 'text/javascript;charset=utf-8' });
     const url = URL.createObjectURL(blob);

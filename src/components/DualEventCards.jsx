@@ -140,7 +140,7 @@ export default function DualEventCards() {
               <div className="flex justify-center mb-5">
                 <div className="w-12 h-12 rounded-full bg-cream-200/80 flex items-center justify-center border border-gold-300">
                   <img 
-                    src="/assets/sf-img-4.png" 
+                    src={data.couple.eventIconImage}
                     alt="Nhẫn cưới" 
                     className="w-8 h-8 object-contain"
                   />

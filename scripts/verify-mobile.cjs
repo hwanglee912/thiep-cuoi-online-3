@@ -132,6 +132,7 @@ fs.mkdirSync(output, { recursive: true });
   await page.getByRole('button', { name: 'Đóng xem ảnh' }).click();
   await context.close();
   const legacy = structuredClone(defaults);
+  delete legacy.imageSettingsVersion;
   legacy.couple.groom.avatar = '/assets/sf-img-5.webp';
   legacy.couple.bride.avatar = '/assets/sf-img-10.webp';
   legacy.couple.heroImage = '/assets/sf-img-25.webp';

@@ -1,11 +1,13 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { 
-  X, Lock, Key, Save, Download, RefreshCw, Plus, Trash2, 
-  Upload, Image as ImageIcon, Heart, Calendar, Music, Sparkles, Check
+  X, Lock, Key, Save, Download, Image as ImageIcon, Heart, Calendar, Music
 } from 'lucide-react';
 import { useWeddingData } from '../context/WeddingDataContext';
 import useDialog from '../hooks/useDialog';
 import { getDayOfWeek } from '../utils/weddingDate';
+import AdminImagePanel, { createAdminDraft } from './AdminImagePanel';
+import { validateImages } from '../utils/imageUpload';
+import GuestInvitationEditor from './GuestInvitationEditor';
 
 export default function AdminModal() {
   const { 
@@ -23,16 +25,19 @@ export default function AdminModal() {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [activeTab, setActiveTab] = useState('couple'); // couple, events, gallery, settings
-  const [formData, setFormData] = useState(JSON.parse(JSON.stringify(data)));
+  const [formData, setFormData] = useState(() => createAdminDraft(data));
+  const [pendingUploads, setPendingUploads] = useState(0);
+  const onBusyChange = useCallback((busy) => setPendingUploads((count) => Math.max(0, count + (busy ? 1 : -1))), []);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
   const dialogRef = useRef(null);
   const closeDialog = useCallback(() => setIsAdminOpen(false), [setIsAdminOpen]);
   useDialog(dialogRef, isAdminOpen, closeDialog);
+  useEffect(() => { setSaveSuccess(false); setSaveError(''); }, [formData]);
 
   // Sync formData when data changes or modal opens
   const handleOpen = () => {
-    setFormData(JSON.parse(JSON.stringify(data)));
+    setFormData(createAdminDraft(data));
     setSaveSuccess(false);
   };
 
@@ -54,13 +59,15 @@ export default function AdminModal() {
   };
 
   const handleSave = () => {
+    if (pendingUploads) return;
     try {
+      validateImages(formData);
       updateData(formData);
       setSaveSuccess(true);
       setSaveError('');
-    } catch {
+    } catch (error) {
       setSaveSuccess(false);
-      setSaveError('Chưa lưu được. Kiểm tra ngày giờ và dung lượng ảnh tải lên; bộ nhớ trình duyệt có thể đã đầy.');
+      setSaveError(error.name === 'QuotaExceededError' ? 'Bộ nhớ trình duyệt đã đầy. Bạn có thể tải file weddingData.js để giữ các ảnh đã chọn hoặc dùng đường dẫn ảnh.' : `Chưa lưu được. ${error.message || 'Kiểm tra ngày giờ và quyền lưu của trình duyệt.'}`);
     }
   };
 
@@ -71,46 +78,10 @@ export default function AdminModal() {
     }
   };
 
-  // Image upload helper (converts to base64 for instant preview & persistence)
-  const handleImageUpload = (file, callback) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      callback(e.target.result);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // Gallery handlers
-  const handleAddPhoto = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      handleImageUpload(file, (dataUrl) => {
-        const newPhoto = {
-          src: dataUrl,
-          alt: 'Ảnh kỷ niệm mới',
-          caption: 'Khoảnh khắc yêu thương',
-          span: 'col-span-12 md:col-span-4'
-        };
-        setFormData({
-          ...formData,
-          gallery: [newPhoto, ...formData.gallery]
-        });
-      });
-    }
-  };
-
-  const handleDeletePhoto = (index) => {
-    if (window.confirm('Bạn có chắc muốn xóa ảnh này khỏi album?')) {
-      const updated = formData.gallery.filter((_, i) => i !== index);
-      setFormData({ ...formData, gallery: updated });
-    }
-  };
-
-  const handleUpdateCaption = (index, newCaption) => {
-    const updated = [...formData.gallery];
-    updated[index].caption = newCaption;
-    setFormData({ ...formData, gallery: updated });
+  const handleExport = () => {
+    if (pendingUploads) return;
+    try { validateImages(formData); exportConfigFile(formData); setSaveError(''); }
+    catch (error) { setSaveError(`Chưa tải được file. ${error.message}`); }
   };
 
   if (!isAdminOpen) return null;
@@ -120,8 +91,8 @@ export default function AdminModal() {
       <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border-2 border-champagne overflow-hidden flex flex-col max-h-[90svh]">
         
         {/* Header */}
-        <div className="px-6 py-4 bg-charcoal-900 text-white flex items-center justify-between border-b border-gold-500/30">
-          <div className="flex items-center gap-2">
+        <div className="shrink-0 px-4 sm:px-6 py-4 bg-charcoal-900 text-white flex items-center justify-between gap-2 border-b border-gold-500/30">
+          <div className="flex items-center gap-2 min-w-0">
             <Key className="w-5 h-5 text-gold-400" />
             <h3 className="font-serif text-lg sm:text-xl font-bold tracking-wide">
               {isAdminLoggedIn ? 'Bảng Quản Trị Thiệp Cưới (Admin)' : 'Đăng Nhập Quản Trị'}
@@ -130,7 +101,7 @@ export default function AdminModal() {
           <button
             onClick={() => setIsAdminOpen(false)}
             aria-label="Đóng quản trị"
-            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+            className="w-11 h-11 shrink-0 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -198,9 +169,9 @@ export default function AdminModal() {
           </div>
         ) : (
           /* LOGGED IN CMS DASHBOARD */
-          <div className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
             {/* Tabs Bar */}
-            <div className="flex items-center gap-1 p-2 bg-cream-100 border-b border-champagne overflow-x-auto text-xs sm:text-sm font-medium">
+            <div className="shrink-0 flex items-center gap-1 p-2 bg-cream-100 border-b border-champagne overflow-x-auto text-xs sm:text-sm font-medium">
               <button
                 onClick={() => setActiveTab('couple')}
                 className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 whitespace-nowrap ${
@@ -228,7 +199,7 @@ export default function AdminModal() {
                 }`}
               >
                 <ImageIcon className="w-3.5 h-3.5" />
-                <span>Album Ảnh ({formData.gallery.length})</span>
+                <span>Ảnh & Album ({formData.gallery.length})</span>
               </button>
 
               <button
@@ -243,7 +214,7 @@ export default function AdminModal() {
             </div>
 
             {/* Form Panels */}
-            <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-6 text-sm text-charcoal-900">
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1 min-h-0 space-y-6 text-sm text-charcoal-900">
               
               {/* TAB 1: COUPLE */}
               {activeTab === 'couple' && (
@@ -353,6 +324,7 @@ export default function AdminModal() {
                   </div>
 
                   {/* Vow quote */}
+                  <GuestInvitationEditor value={formData.invitation?.guestName} onChange={(guestName) => setFormData((current) => ({ ...current, invitation: { ...current.invitation, guestName } }))} />
                   <div className="p-4 sm:p-5 rounded-2xl bg-cream-50 border border-champagne space-y-2">
                     <h5 className="font-serif font-bold text-base text-gold-700">Thông Điệp Tình Yêu (Quote)</h5>
                     <textarea
@@ -541,66 +513,8 @@ export default function AdminModal() {
                 </div>
               )}
 
-              {/* TAB 3: GALLERY */}
-              {activeTab === 'gallery' && (
-                <div className="space-y-5">
-                  {/* Upload new photo button */}
-                  <div className="p-4 rounded-2xl border-2 border-dashed border-gold-400 bg-cream-50 text-center flex flex-col items-center justify-center gap-2">
-                    <ImageIcon className="w-8 h-8 text-gold-600" />
-                    <div>
-                      <p className="font-serif font-bold text-base text-charcoal-900">
-                        Thêm Ảnh Vào Album Kỷ Niệm
-                      </p>
-                      <p className="font-sans text-xs text-charcoal-800/60">
-                        Chọn ảnh từ máy tính hoặc điện thoại của bạn
-                      </p>
-                    </div>
-                    <label className="mt-2 px-5 py-2.5 rounded-xl bg-charcoal-900 hover:bg-gold-600 text-white text-xs font-medium cursor-pointer transition-colors flex items-center gap-2">
-                      <Plus className="w-4 h-4" />
-                      <span>Chọn file ảnh để tải lên</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleAddPhoto}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-
-                  {/* List of existing photos */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {formData.gallery.map((photo, index) => (
-                      <div key={index} className="p-3 rounded-xl bg-white border border-champagne space-y-2 relative group shadow-sm">
-                        <div className="relative aspect-video rounded-lg overflow-hidden bg-cream-100">
-                          <img
-                            src={photo.src}
-                            alt={photo.alt}
-                            className="w-full h-full object-cover"
-                          />
-                          <button
-                            onClick={() => handleDeletePhoto(index)}
-                            aria-label="Xóa ảnh"
-                            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity shadow"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-
-                        <div>
-                          <label className="block text-[11px] text-charcoal-800/60 mb-0.5">Chú thích ảnh</label>
-                          <input
-                            type="text"
-                            value={photo.caption}
-                            onChange={(e) => handleUpdateCaption(index, e.target.value)}
-                            className="w-full px-2 py-1.5 rounded-lg border border-champagne text-xs"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
+              {/* All invitation images and album */}
+              {activeTab === 'gallery' && <AdminImagePanel formData={formData} setFormData={setFormData} onBusyChange={onBusyChange} />}
               {/* TAB 4: SETTINGS */}
               {activeTab === 'settings' && (
                 <div className="space-y-4">
@@ -652,19 +566,22 @@ export default function AdminModal() {
             </div>
 
             {/* Footer Action Buttons */}
-            <div className="px-6 py-4 bg-cream-100 border-t border-champagne flex flex-wrap items-center justify-between gap-3">
+            <div className="shrink-0 px-4 sm:px-6 py-3 sm:py-4 bg-cream-100 border-t border-champagne flex flex-wrap items-center justify-between gap-3">
+              {pendingUploads > 0 && <p role="status" className="w-full text-sm">Đang xử lý {pendingUploads} ảnh. Vui lòng đợi trước khi lưu hoặc tải file.</p>}
               {saveError && <p role="alert" className="w-full text-sm text-red-700">{saveError}</p>}
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 min-w-0">
                 <button
                   onClick={handleSave}
-                  className="px-5 py-2.5 rounded-xl bg-gold-600 hover:bg-gold-700 text-white font-medium text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                  disabled={pendingUploads > 0}
+                  className="min-h-11 px-4 py-2.5 rounded-xl bg-gold-600 hover:bg-gold-700 text-white font-medium text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   <span>{saveSuccess ? 'Đã lưu thành công!' : 'Lưu Thay Đổi'}</span>
                 </button>
 
                 <button
-                  onClick={exportConfigFile}
+                  onClick={handleExport}
+                  disabled={pendingUploads > 0}
                   className="px-4 py-2.5 rounded-xl bg-charcoal-900 hover:bg-charcoal-800 text-champagne text-xs sm:text-sm font-medium flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                   title="Tải file weddingData.js để thay thế vào dự án trước khi deploy Vercel"
                 >
@@ -676,14 +593,14 @@ export default function AdminModal() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleReset}
-                  className="px-3 py-2 rounded-lg hover:bg-white text-charcoal-800/70 text-xs transition-colors"
+                  className="min-h-11 px-3 py-2 rounded-lg hover:bg-white text-charcoal-800/70 text-xs transition-colors"
                 >
                   Khôi phục gốc
                 </button>
 
                 <button
                   onClick={handleLogout}
-                  className="px-3 py-2 rounded-lg hover:bg-red-50 text-red-600 text-xs transition-colors"
+                  className="min-h-11 px-3 py-2 rounded-lg hover:bg-red-50 text-red-700 text-xs transition-colors"
                 >
                   Đăng xuất
                 </button>

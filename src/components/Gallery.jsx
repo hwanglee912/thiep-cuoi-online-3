@@ -7,7 +7,9 @@ import useDialog from '../hooks/useDialog';
 export default function Gallery() {
   const { data } = useWeddingData();
   const gallery = data.gallery || [];
-  const [selectedIndex, setSelectedIndex] = useState(() => Math.max(0, gallery.findIndex((photo) => photo.src === data.galleryCoverImage)));
+  const findCover = () => Math.max(0, gallery.findIndex((photo) => data.galleryCoverId ? photo.id === data.galleryCoverId : photo.src === data.galleryCoverImage));
+  const [selectedIndex, setSelectedIndex] = useState(findCover);
+  const previousCover = useRef({ src: data.galleryCoverImage, id: data.galleryCoverId });
   const index = Math.min(selectedIndex, Math.max(0, gallery.length - 1));
   const photo = gallery[index];
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -20,6 +22,12 @@ export default function Gallery() {
   const closeLightbox = useCallback(() => setLightboxOpen(false), []);
   const isOpen = lightboxOpen && !!photo;
   useDialog(dialogRef, isOpen, closeLightbox);
+  useEffect(() => {
+    if (previousCover.current.src !== data.galleryCoverImage || previousCover.current.id !== data.galleryCoverId) {
+      setSelectedIndex(Math.max(0, gallery.findIndex((photo) => data.galleryCoverId ? photo.id === data.galleryCoverId : photo.src === data.galleryCoverImage)));
+      previousCover.current = { src: data.galleryCoverImage, id: data.galleryCoverId };
+    } else setSelectedIndex((current) => Math.min(current, Math.max(0, gallery.length - 1)));
+  }, [gallery, data.galleryCoverImage, data.galleryCoverId]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -94,7 +102,7 @@ export default function Gallery() {
         <div className="album-stage" onTouchStart={startSwipe} onTouchEnd={endSwipe} onTouchCancel={() => { touchRef.current = null; }}>
           <button type="button" className="album-open" aria-label={`Phóng to ảnh ${index + 1}: ${photo.alt || 'Ảnh cưới'}`}
             onClick={() => { if (performance.now() >= suppressClickUntil.current) setLightboxOpen(true); }}>
-            <img key={`${photo.src}-${index}`} src={photo.src} alt={photo.alt || 'Ảnh cưới'} loading="lazy" decoding="async" width="614" height="921" className="album-main-image" />
+            <img key={`${photo.src}-${index}`} src={photo.src} alt={photo.alt || 'Ảnh cưới'} loading="lazy" decoding="async" width="614" height="921" className="album-main-image" style={{ objectPosition: photo.imagePosition || '50% 35%' }} />
             <span aria-hidden="true" className="album-expand"><Maximize2 size={18} /></span>
           </button>
           {gallery.length > 1 && <>
@@ -105,7 +113,7 @@ export default function Gallery() {
         <div ref={stripRef} className="album-thumbnails" aria-label="Chọn ảnh trong album">
           {gallery.map((item, itemIndex) => <button key={`${item.src}-${itemIndex}`} type="button" className="album-thumbnail" aria-pressed={index === itemIndex}
             aria-label={`Chọn ảnh ${itemIndex + 1}: ${item.alt || 'Ảnh cưới'}`} onClick={() => setSelectedIndex(itemIndex)}>
-            <img src={item.src} alt="" loading="lazy" decoding="async" width="120" height="120" />
+            <img src={item.src} alt="" loading="lazy" decoding="async" width="120" height="120" style={{ objectPosition: item.imagePosition || '50% 35%' }} />
           </button>)}
         </div>
         <p className="album-caption" aria-live="polite" aria-atomic="true"><span>{photo.caption}</span><span className="album-count">Ảnh {index + 1} / {gallery.length}</span></p>

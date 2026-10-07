@@ -127,7 +127,7 @@
 .hero-names h1 { display: flex; flex-direction: column; gap: 5px; font-size: clamp(30px, 6.6vw, 48px); font-weight: 500; line-height: 1.35; overflow-wrap: anywhere; }
 .hero-ampersand { position: absolute; inset: 0; display: grid; place-items: center; font-size: clamp(90px, 21vw, 150px); opacity: .26; pointer-events: none; line-height: 1; }
 .hero-date { margin-top: 18px; font-size: clamp(20px, 4.6vw, 28px); font-weight: 500; letter-spacing: .05em; font-variant-numeric: tabular-nums; }
-.couple-invitation { padding: 42px 16px 48px; background: #fbfbfa url('/assets/sf-img-1.webp') center top / 420px auto repeat; }
+.couple-invitation { padding: 42px 16px 48px; background-color: #fbfbfa; background-position: center top; }
 .invitation-heading { text-align: center; max-width: 670px; margin: 0 auto 44px; color: #806025; }
 .invitation-heading h2 { font-size: clamp(22px, 5.2vw, 34px); line-height: 1.35; text-transform: uppercase; font-weight: 500; }
 .invitation-guest { font-size: clamp(40px, 10vw, 56px); line-height: 1.4; margin: 14px 0 4px; }
@@ -193,6 +193,19 @@
 .calendar-quote { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgb(255 255 255 / .3); font-size: 13px; line-height: 1.6; }
 .gallery-dialog { padding-top: calc(64px + env(safe-area-inset-top, 0px)); padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
 .gallery-dialog img { max-height: 68svh; }
+.admin-image-editor { min-width: 0; padding: 16px; border: 1px solid #d9cbb5; border-radius: 12px; background: #fff; display: flex; flex-direction: column; gap: 10px; }
+.admin-image-preview { height: 210px; display: grid; place-items: center; overflow: hidden; background: #f4eee5; border-radius: 6px; }
+.admin-image-preview img { width: 100%; height: 100%; object-fit: contain; }
+.admin-image-editor:has(input[type='range']) .admin-image-preview { height: auto; aspect-ratio: 3 / 4; }
+.admin-image-editor:has(input[type='range']) .admin-image-preview img { object-fit: cover; }
+.admin-image-button, .admin-image-reset, .admin-image-delete { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 10px 12px; border-radius: 8px; font-size: 12px; line-height: 1.5; }
+.admin-image-button { background: #262422; color: #fff; }
+.admin-image-reset { border: 1px solid #946e22; color: #635338; background: #fff; }
+.admin-image-reset[aria-pressed='true'] { background: #f4ece0; border-width: 2px; }
+.admin-image-delete { color: #b91c1c; background: #fef2f2; }
+.admin-image-input { display: block; width: 100%; min-width: 0; min-height: 44px; padding: 10px; border: 1px solid #d9cbb5; border-radius: 8px; font-size: 14px; color: #262422; background: white; }
+.admin-image-range { display: block; width: 100%; min-height: 44px; accent-color: #806025; }
+button:disabled { cursor: wait; opacity: .6; }
 .petals-paused .animate-petal-fall { animation-play-state: paused; }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 .animate-fade-in { animation: fade-in .3s ease-out both; }

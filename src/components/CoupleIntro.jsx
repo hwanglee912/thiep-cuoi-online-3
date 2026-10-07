@@ -2,15 +2,20 @@ import React from 'react';
 import { Calendar, Heart } from 'lucide-react';
 import { useWeddingData } from '../context/WeddingDataContext';
 import Countdown from './Countdown';
+import { getGuestName } from '../utils/guestInvitation';
 
 export default function CoupleIntro() {
   const { data } = useWeddingData();
   const { groom, bride, quote, storySnippet } = data.couple;
   return (
-    <section id="couple" className="couple-invitation" aria-labelledby="invitation-title">
+    <section id="couple" className="couple-invitation" aria-labelledby="invitation-title" style={{
+      backgroundImage: `url(${JSON.stringify(data.couple.invitationBackground)})`,
+      backgroundSize: data.couple.invitationBackgroundMode === 'cover' ? 'cover' : '420px auto',
+      backgroundRepeat: data.couple.invitationBackgroundMode === 'cover' ? 'no-repeat' : 'repeat',
+    }}>
       <div className="invitation-heading" data-reveal="up">
         <h2 id="invitation-title" className="font-serif">Thư mời tham dự lễ cưới</h2>
-        <p className="invitation-guest font-script">Khách mời</p>
+        <p className="invitation-guest font-script">{getGuestName(data, window.location.search)}</p>
         <div className="invitation-rule" aria-hidden="true" />
         <p className="invitation-message font-serif">
           Trân trọng kính mời đến dự lễ cưới của<br />
