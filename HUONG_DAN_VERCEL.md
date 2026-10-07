@@ -57,12 +57,28 @@ Sau đó mở trình duyệt truy cập: `http://localhost:3000`
 ## 3. CÁCH DEPLOY LÊN VERCEL (HOÀN TOÀN MIỄN PHÍ)
 
 ### Cách 1: Đẩy lên GitHub rồi kết nối Vercel (Khuyên dùng)
-1. Đẩy toàn bộ mã nguồn của thư mục này lên một repository mới trên GitHub cá nhân của bạn.
+1. Đẩy mã nguồn lên GitHub, bao gồm `.gitignore`, `package.json`, `package-lock.json` và `vercel.json`. Không đưa `node_modules`, `dist`, thư mục bản sao hoặc kết quả kiểm tra lên GitHub. Vercel tự cài thư viện bằng `npm ci` theo file khóa.
 2. Truy cập [vercel.com](https://vercel.com) và đăng nhập bằng tài khoản GitHub.
 3. Nhấn nút **"Add New..."** -> Chọn **"Project"**.
 4. Tìm và chọn repository bạn vừa đẩy lên GitHub, nhấn **"Import"**.
 5. Nhấn nút **"Deploy"**.
-6. Sau khoảng 30 giây, Vercel sẽ cấp cho bạn một đường link miễn phí (ví dụ: `damcuoi-ducanh-thuyen.vercel.app`) có HTTPS bảo mật, sẵn sàng gửi cho bạn bè!
+6. Khi build thành công, Vercel sẽ cấp cho bạn một đường link có HTTPS để gửi cho khách mời.
+
+### Nếu gặp `node_modules/.bin/vite: Permission denied` (mã lỗi 126)
+
+Lỗi này xảy ra khi đưa `node_modules` từ Windows lên GitHub và Vercel dùng lại file chạy không có quyền thực thi trên Linux. Bản sửa đã bỏ các thư mục sinh tự động khỏi Git, thêm `.gitignore`, cài sạch bằng `npm ci` và gọi Vite qua Node trong lệnh build.
+
+Đẩy cả các thay đổi xóa khỏi Git (file vẫn còn trên máy) lên nhánh `main` bằng công cụ GitHub đang dùng. Nếu dùng PowerShell tại thư mục dự án:
+
+```powershell
+git add .gitignore package.json package-lock.json vercel.json HUONG_DAN_VERCEL.md
+git commit -m "Fix Vercel build and stop tracking generated dependencies"
+git push origin main
+```
+
+Nếu Vercel chưa tự chạy bản mới, chọn **Redeploy** và bỏ chọn **Use existing Build Cache**. Trong Build Settings, dùng Install Command `npm ci`, Build Command `npm run build`, Output Directory `dist`. Redeploy commit cũ `0279683` sẽ không có bản sửa.
+
+`allowScripts` trong `package.json` cho phép riêng script cài đặt `esbuild@0.25.12`, theo [hướng dẫn npm](https://docs.npmjs.com/cli/v11/commands/npm-install-scripts/). `installCommand` trong `vercel.json` theo [cấu hình Vercel](https://vercel.com/docs/project-configuration).
 
 ### Cách 2: Deploy trực tiếp bằng Vercel CLI
 1. Cài đặt Vercel CLI:

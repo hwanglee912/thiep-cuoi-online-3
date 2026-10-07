@@ -1,0 +1,16 @@
+# Dependencies and generated builds are installed on the deployment platform.
+node_modules/
+dist/
+.vercel/
+
+# Local snapshots and review output.
+.codex-backups/
+artifacts/
+
+# Local environment and editor files.
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
