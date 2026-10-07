@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #FAF6EE;
+    color: #262422;
+    font-family: 'Outfit', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Custom subtle scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #F4ECE0;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #DFCDAF;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #CFA453;
+  }
+}
+
+/* Glassmorphism card styles */
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(223, 190, 122, 0.35);
+}
+
+.glass-card-dark {
+  background: rgba(26, 24, 22, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(207, 164, 83, 0.25);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #B88D37 0%, #DFBE7A 50%, #946E22 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-border-glow {
+  box-shadow: 0 0 25px -5px rgba(207, 164, 83, 0.25);
+}
+
+/* Texture overlay for paper feel */
+.vintage-texture {
+  background-image: radial-gradient(rgba(184, 141, 55, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Falling Petals Keyframe Animation */
+@keyframes petalFall {
+  0% {
+    transform: translate3d(0, -10px, 0) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate3d(35px, 50vh, 0) rotate(180deg);
+  }
+  85% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate3d(-30px, 105vh, 0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.animate-petal-fall {
+  animation-name: petalFall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+
+/* Pulsing heart ring on calendar */
+@keyframes heartPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.7;
+  }
+}
+
+.animate-heart-pulse {
+  animation: heartPulse 2.4s ease-in-out infinite;
+}
